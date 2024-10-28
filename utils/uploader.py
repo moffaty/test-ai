@@ -1,12 +1,8 @@
-from utils.purpose import Purpose
-from utils.schemas.attachment import Tool, AttachmentContainer
-from typing import Iterable, Optional, List, Union
-from openai.types import FileObject
-from openai.types.beta import Thread
-from openai.types.beta.thread_create_params import Message, MessageAttachment, MessageAttachmentTool
-from openai.types.beta.threads.message_content import MessageContent
 from openai import OpenAI
-from utils.file.file import File
+from typing import Optional, List, Union
+from utils.file import File, FileObject, FilePurpose
+from utils.schemas.message import Message, MessageContent, Thread
+from utils.schemas.attachment import MessageAttachment, AttachmentContainer, Tool
 
 class FileUploader:
     def __init__(self, client: OpenAI) -> None:
@@ -18,12 +14,12 @@ class FileUploader:
             "content": content,
         }
 
-    def create_file(self, file: str, purpose: Optional[Iterable[Purpose]] = Purpose.Assistants) -> FileObject:
+    def create_file(self, file: str, purpose: Optional[FilePurpose] = 'assistants') -> FileObject:
         return self.client.files.create(
             file=File(file).stream, purpose=str(purpose)
         )
     
-    def create_files(self, files: list[str], purpose: Optional[Iterable[Purpose]] = Purpose.Assistants) -> list[FileObject]:
+    def create_files(self, files: list[str], purpose: Optional[FilePurpose] = 'assistants') -> list[FileObject]:
         file_objects = []
         for file in files:
             file = File(file)
@@ -33,38 +29,25 @@ class FileUploader:
         return file_objects
     
     def attach(self, 
-               content: Union[MessageContent, str], 
-               message_file: Optional[Union[MessageAttachment, str]] = None,
-               type: Optional[Tool] = Tool(type='file_search')) -> Thread:
-            attachment: MessageAttachment
-            message: Message = self.create_message(content)
-            if message_file:
-                attachment = AttachmentContainer(
-                    attachments=[
-                        MessageAttachment(
-                            file_id=message_file.id,
-                            tools=[type.to_dict()]
-                        )
-                    ]
-                )
-                message["attachments"] = attachment.attachments
-            return self.client.beta.threads.create(messages=[message])   
+            content: Union[MessageContent, str], 
+            message_files: Optional[Union[MessageAttachment, str, List[Union[MessageAttachment, str]]]] = None,
+            type: Optional[Tool] = Tool(type='file_search')) -> Thread:
+        message: Message = self.create_message(content)
+        attachments = []
+
+        if message_files:
+            if not isinstance(message_files, list):
+                message_files = [message_files]
             
-            
-    def attach_many(self, 
-                    content: Union[MessageContent, str], 
-                    message_files: Optional[List[Union[MessageAttachment, str]]] = None,
-                    type: Optional[Tool] = Tool(type='file_search')) -> Thread:
-            message: Message = self.create_message(content)
-            attachments = []
-            if message_files:
-                for message_file in message_files:
-                    attachments.append(
-                        MessageAttachment(
-                            file_id=message_file.id, 
-                            tools=[type.to_dict()]
-                        )
+            for message_file in message_files:
+                attachments.append(
+                    MessageAttachment(
+                        file_id=message_file.id,
+                        tools=[type.to_dict()]
                     )
-                attachment_container = AttachmentContainer(attachments=attachments)
-                message['attachments'] = attachment_container.attachments
-            return self.client.beta.threads.create(messages=[message])   
+                )
+
+            attachment_container = AttachmentContainer(attachments=attachments)
+            message["attachments"] = attachment_container.attachments
+        
+        return self.client.beta.threads.create(messages=[message])

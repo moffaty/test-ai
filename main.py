@@ -42,7 +42,7 @@ class Client:
 if __name__ == '__main__':
     client = Client()
     # message_pdf = client.uploader.create_files(['test/test.pdf', 'test/test2.pdf'])
-    # message_json = client.uploader.create_file('test/test.json')
+    message_json = client.uploader.create_file('test/test.json')
     message_docx = client.uploader.create_file('test/test.docx')
     # thread = client.uploader.attach('Tell me what in "message" in this json', message_json)
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     client.send(thread)
 
-    thread = client.uploader.attach_many(f'Сделай краткую выжимку из прошлого текста. File id=${message_docx.id}', [message_docx])
+    thread = client.uploader.attach(f'Сделай краткую выжимку из прошлого текста. И скажи что находится в файле json', [message_docx, message_json])
 
     client.send(thread)
 
