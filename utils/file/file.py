@@ -4,24 +4,27 @@ import mimetypes
 from dotenv import load_dotenv
 from utils.file.file_types import FileTypes
 
+
 class FileError(Exception):
     class FileSizeError(Exception):
         """Исключение для файлов, которые превышают допустимый размер."""
+
         pass
 
     class FileTypeError(Exception):
         """Исключение для файлов, которые не подходят под допустимый тип."""
+
         pass
 
 
 class File:
     def __init__(self, path) -> None:
         load_dotenv()
-        
+
         self.path = path
 
         try:
-            self.max_size = int(os.getenv('MAX_FILE_SIZE', 0))
+            self.max_size = int(os.getenv("MAX_FILE_SIZE", 0))
         except ValueError:
             raise ValueError("MAX_FILE_SIZE in configuration might be an int.")
 
@@ -38,7 +41,7 @@ class File:
             raise FileError.FileTypeError(
                 f"File type is not allowed. Please use a valid file type."
             )
-        
+
         self.stream = open(path, "rb")
 
     @staticmethod
@@ -53,7 +56,7 @@ class File:
     def get_file_type(file_path) -> str:
         """Возвращает MIME-тип файла на основе его пути."""
         mime_type, _ = mimetypes.guess_type(file_path)
-        return mime_type if mime_type else 'unknown/unknown'
+        return mime_type if mime_type else "unknown/unknown"
 
     @staticmethod
     def get_file_type_from_enum(file_path) -> FileTypes:
