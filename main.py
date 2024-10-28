@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     # client.send(thread)
 
-    thread = client.uploader.attach_many('Сколько весит загруженный файл', [message_docx])
+    thread = client.uploader.attach('Привет. Как сделать программу "Hello world" на Perl. Напиши только код')
 
     client.send(thread)
 

@@ -1,0 +1,4 @@
+.venv
+.env.secret
+__pycache__
+test

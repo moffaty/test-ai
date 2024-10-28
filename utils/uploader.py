@@ -1,9 +1,9 @@
 from utils.purpose import Purpose
-from utils.schemas.attachment import Attachment, Tool, AttachmentContainer
+from utils.schemas.attachment import Tool, AttachmentContainer
 from typing import Iterable, Optional, List, Union
 from openai.types import FileObject
 from openai.types.beta import Thread
-from openai.types.beta.thread_create_params import Message, MessageAttachment
+from openai.types.beta.thread_create_params import Message, MessageAttachment, MessageAttachmentTool
 from openai.types.beta.threads.message_content import MessageContent
 from openai import OpenAI
 from utils.file.file import File
@@ -33,27 +33,26 @@ class FileUploader:
         return file_objects
     
     def attach(self, 
-               content: MessageContent, 
+               content: Union[MessageContent, str], 
                message_file: Optional[Union[MessageAttachment, str]] = None,
                type: Optional[Tool] = Tool(type='file_search')) -> Thread:
-            attachment: Attachment
+            attachment: MessageAttachment
             message: Message = self.create_message(content)
             if message_file:
                 attachment = AttachmentContainer(
                     attachments=[
                         MessageAttachment(
                             file_id=message_file.id,
-                            tools=[Tool(type=str(type))]
+                            tools=[type.to_dict()]
                         )
                     ]
                 )
                 message["attachments"] = attachment.attachments
-                return self.client.beta.threads.create(messages=[message])   
-            else:
-                raise ValueError("Invalid arguments provided.")
+            return self.client.beta.threads.create(messages=[message])   
+            
             
     def attach_many(self, 
-                    content: MessageContent, 
+                    content: Union[MessageContent, str], 
                     message_files: Optional[List[Union[MessageAttachment, str]]] = None,
                     type: Optional[Tool] = Tool(type='file_search')) -> Thread:
             message: Message = self.create_message(content)
@@ -63,9 +62,9 @@ class FileUploader:
                     attachments.append(
                         MessageAttachment(
                             file_id=message_file.id, 
-                            tools=[Tool(type=str(type))]
+                            tools=[type.to_dict()]
                         )
                     )
-            attachment_container = AttachmentContainer(attachments=attachments)
-            message['attachments'] = attachment_container.attachments
+                attachment_container = AttachmentContainer(attachments=attachments)
+                message['attachments'] = attachment_container.attachments
             return self.client.beta.threads.create(messages=[message])   

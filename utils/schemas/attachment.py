@@ -8,5 +8,8 @@ class Tool(BaseModel):
     def __str__(self) -> str:
         return self.type
 
+    def to_dict(self):
+        return {"type": self.type}
+
 class AttachmentContainer(BaseModel):
     attachments: List[MessageAttachment]
