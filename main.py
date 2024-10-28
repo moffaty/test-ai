@@ -2,7 +2,6 @@ import os
 from typing_extensions import override
 from openai import OpenAI
 from dotenv import dotenv_values
-from utils.tools import Tools
 from utils.uploader import FileUploader
 
 class Client:
@@ -17,7 +16,7 @@ class Client:
             name="Financial Analyst Assistant",
             instructions="You are an expert financial analyst. Use you knowledge base to answer questions about audited financial statements.",
             model="gpt-4o",
-            tools=[{"type": str(Tools.FileOperations.FILE_SEARCH)}],
+            tools=[{"type": 'file_search'}],
         )
     
     def send(self, thread):
@@ -42,18 +41,22 @@ class Client:
 
 if __name__ == '__main__':
     client = Client()
-    message_pdf = client.uploader.create_files(['test/test.pdf', 'test/test2.pdf'])
-    message_json = client.uploader.create_file('test/test.json')
+    # message_pdf = client.uploader.create_files(['test/test.pdf', 'test/test2.pdf'])
+    # message_json = client.uploader.create_file('test/test.json')
     message_docx = client.uploader.create_file('test/test.docx')
+    # thread = client.uploader.attach('Tell me what in "message" in this json', message_json)
 
-    thread = client.uploader.attach('Tell me what in "message" in this json', message_json)
+    # client.send(thread)
+
+    # thread = client.uploader.attach_many('Tell me how much money i spent. And tell me how much i need to payback', message_pdf)
+
+    # client.send(thread)
+
+    thread = client.uploader.attach_many('Сколько весит загруженный файл', [message_docx])
 
     client.send(thread)
 
-    thread = client.uploader.attach_many('Tell me how much money i spent. And tell me how much i need to payback', message_pdf)
+    thread = client.uploader.attach_many(f'Сделай краткую выжимку из прошлого текста. File id=${message_docx.id}', [message_docx])
 
     client.send(thread)
 
-    thread = client.uploader.attach_many('Tell me what is displayed in documents', [message_docx])
-
-    client.send(thread)
