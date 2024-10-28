@@ -10,7 +10,7 @@ class Client:
         config = dotenv_values(".env.secret")
         self.client = OpenAI(api_key=config["OPENAI_API_KEY"])
         self.uploader = FileUploader(self.client)
-        self.assistant_manager = AssistantsManager(self.client)
+        self.assistant_manager = AssistantsManager(self.client, assistent_id)
 
     def send(self, thread, assistant_id: Optional[str] = None):
         if assistant_id is None:
