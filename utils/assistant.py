@@ -1,13 +1,13 @@
 from openai import OpenAI
 from typing import Optional, Literal
 from dotenv import dotenv_values, set_key
-from openai.types.beta import Assistant as AssistantModel
+from openai.types.beta import Assistant
 from openai.types.beta import AssistantDeleted
 from openai.pagination import SyncCursorPage
 from openai._types import NotGiven, NOT_GIVEN
 
 
-class Assistant:
+class AssistantsManager:
     def __init__(self, client: OpenAI, assistant_id: Optional[str] = None) -> None:
         self.default_name = "General Assistant"
         self.client = client
@@ -30,7 +30,7 @@ class Assistant:
 
     def create(
         self, name: Optional[str] = None, instructions: Optional[str] = None
-    ) -> AssistantModel:
+    ) -> Assistant:
         return self.client.beta.assistants.create(
             name=name or self.default_name,
             instructions=instructions
@@ -46,7 +46,7 @@ class Assistant:
             tools=[{"type": "file_search"}],
         )
 
-    def find(self, assistant_id: str) -> AssistantModel:
+    def find(self, assistant_id: str) -> Assistant:
         return self.client.beta.assistants.retrieve(assistant_id)
 
     def delete(self, assistant_id: str) -> AssistantDeleted:
@@ -59,7 +59,7 @@ class Assistant:
         before: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
         order: Literal["asc", "desc"] | NotGiven = NOT_GIVEN
-    ) -> SyncCursorPage[AssistantModel]:
+    ) -> SyncCursorPage[Assistant]:
         return self.client.beta.assistants.list(
             after=after, before=before, limit=limit, order=order
         )
