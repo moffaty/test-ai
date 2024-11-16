@@ -3,11 +3,27 @@ from typing import Optional, List, Union
 from utils.file import File, FileObject, FilePurpose
 from utils.schemas.message import Message, MessageContent, Thread
 from utils.schemas.attachment import MessageAttachment, AttachmentContainer, Tool
+from openai.lib.streaming import AssistantStreamManager
 
 
 class FileUploader:
-    def __init__(self, client: OpenAI) -> None:
-        self.client = client
+    def __init__(self) -> None:
+        self.client = OpenAI()
+
+    async def upload(
+        self, files: List[str], purpose: Optional[str] = "assistants"
+    ) -> List[FileObject]:
+        if not files:
+            return []
+        file_objects = []
+        for file in files:
+            file_instance = File(file)
+            file_object = self.client.files.create(
+                file=(file_instance.filename, file_instance.stream), purpose=purpose
+            )
+            file_objects.append(file_object)
+
+        return file_objects
 
     def create_message(self, content: MessageContent) -> Message:
         return {
@@ -31,8 +47,12 @@ class FileUploader:
             )
         return file_objects
 
+    def get_thread(self, thread_id: str):
+        return self.client.beta.threads.retrieve(thread_id)
+
     def attach(
         self,
+        assistant_id: str,
         content: Union[MessageContent, str],
         message_files: Optional[
             Union[MessageAttachment, str, List[Union[MessageAttachment, str]]]
@@ -53,5 +73,7 @@ class FileUploader:
 
             attachment_container = AttachmentContainer(attachments=attachments)
             message["attachments"] = attachment_container.attachments
-
-        return self.client.beta.threads.create(messages=[message])
+        return self.client.beta.threads.create(
+            assistant_id=assistant_id,
+            thread={"messages": [message]},
+        )
