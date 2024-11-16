@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-from openai import NotFoundError, OpenAI
+from openai import NotFoundError
+from services.safe_openai import SafeOpenAI
 
 from services.assistant.schemas import (
     AssistantTool,
@@ -14,8 +15,8 @@ from openai.types import FileObject
 
 
 class ChatHandler:
-    def __init__(self, client: OpenAI) -> None:
-        self.client = client
+    def __init__(self) -> None:
+        self.client = SafeOpenAI()
 
     def delete_chat(self, thread_id: str) -> ThreadDeleted:
         try:

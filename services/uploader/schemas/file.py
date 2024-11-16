@@ -2,7 +2,7 @@ import os
 import mimetypes
 import ntpath
 from dotenv import load_dotenv
-from utils.file.file_types import FileTypes
+from services.uploader.schemas.file_types import FileTypes
 
 
 class FileError(Exception):

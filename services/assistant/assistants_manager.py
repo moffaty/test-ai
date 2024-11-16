@@ -1,7 +1,7 @@
-from openai import OpenAI
+from services.safe_openai import SafeOpenAI
 from typing import Optional, Literal, Union
 from dotenv import dotenv_values
-from openai import NotFoundError, OpenAI
+from openai import NotFoundError
 from openai._types import NOT_GIVEN, NotGiven
 from openai.pagination import SyncCursorPage
 from openai.types.beta import Assistant, AssistantDeleted, AssistantToolParam
@@ -10,12 +10,11 @@ from openai.types.beta import Assistant, AssistantDeleted, AssistantToolParam
 class AssistantsManager:
     def __init__(
         self,
-        client: OpenAI,
         assistant_id: Optional[str] = None,
         model: Optional[str] = "gpt-4o",
     ) -> None:
         self.default_name = "General Assistant"
-        self.client = client
+        self.client = SafeOpenAI()
         self.id = assistant_id
         self.assistant: Union[Assistant, None] = None
         self.config = dotenv_values(".env.secret")

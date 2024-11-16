@@ -1,5 +1,6 @@
-from openai import OpenAI, AsyncOpenAI
-from dotenv import dotenv_values
+from openai import AsyncOpenAI
+from services.safe_openai import SafeOpenAI
+from dotenv import dotenv_values, load_dotenv
 from typing import Optional, AsyncGenerator, Union
 from services.assistant.assistants_manager import AssistantsManager
 from services.assistant.schemas import AssistantResponse
@@ -8,12 +9,13 @@ from services.assistant.chat_handler import ChatHandler
 
 class OpenAIAssistantService:
     def __init__(self, assistent_id: Optional[str] = None) -> None:
+        load_dotenv(".env.secret")
         self.config = dotenv_values()
         self.is_streaming = self.config.get("SERVICES_ASSISTANT_STREAMING")
-        self.client = OpenAI()
+        self.client = SafeOpenAI()
         self.async_client = AsyncOpenAI()
-        self.chat = ChatHandler(self.client)
-        self.assistant_manager = AssistantsManager(self.client, assistent_id)
+        self.chat = ChatHandler()
+        self.assistant_manager = AssistantsManager(assistent_id)
         self.streaming_media_type = "text/event-stream"
 
     async def get_answer(

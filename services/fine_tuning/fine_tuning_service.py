@@ -1,18 +1,11 @@
-from openai import OpenAI, OpenAIError
 from openai.types import FileObject
 from concurrent.futures import ThreadPoolExecutor
+from services.safe_openai import SafeOpenAI
 
 
 class FineTuningService:
     def __init__(self) -> None:
-        self.client = OpenAI()
-
-    def safe_api_call(func, *args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except OpenAIError as e:
-            print(f"API error: {e}")
-            raise
+        self.client = SafeOpenAI()
 
     def upload_file(self, file_path: str) -> FileObject:
         return self.client.files.create(file=open(file_path, "rb"), purpose="fine-tune")

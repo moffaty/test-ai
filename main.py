@@ -1,4 +1,4 @@
-from services import OpenAIAssistantService, FileUploader
+from services import OpenAIAssistantService, FileUploader, SafeOpenAI
 
 if __name__ == "__main__":
     assistant_service = OpenAIAssistantService()

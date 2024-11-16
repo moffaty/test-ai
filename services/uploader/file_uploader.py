@@ -1,4 +1,4 @@
-from openai import OpenAI
+from services.safe_openai import SafeOpenAI
 from typing import Optional, List, Union
 from services.uploader.schemas import File, FileObject, FilePurpose
 from services.assistant.schemas.message import Message, MessageContent, Thread
@@ -11,7 +11,7 @@ from services.assistant.schemas.attachment import (
 
 class FileUploader:
     def __init__(self) -> None:
-        self.client = OpenAI()
+        self.client = SafeOpenAI()
 
     async def upload(
         self, files: List[str], purpose: Optional[str] = "assistants"
